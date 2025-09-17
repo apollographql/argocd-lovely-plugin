@@ -2,13 +2,14 @@ package processor
 
 import (
 	"fmt"
-	"github.com/crumbhole/argocd-lovely-plugin/pkg/features"
-	"gopkg.in/yaml.v3"
 	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/crumbhole/argocd-lovely-plugin/pkg/features"
+	"gopkg.in/yaml.v3"
 )
 
 // Dependency is one repository that this chart is dependent upon
@@ -155,7 +156,16 @@ func (h HelmProcessor) Generate(input *string, basePath string, path string) (*s
 	}
 	if features.GetHelmValuesSet() {
 		for _, valueFile := range helmValues {
-			params = append(params, []string{`-f`, valueFile}...)
+			include := true
+			if features.GetHelmIgnoreMissingValueFiles() {
+				_, err = os.Stat(path + "/" + valueFile)
+				if os.IsNotExist(err) {
+					include = false
+				}
+			}
+			if include {
+				params = append(params, []string{`-f`, valueFile}...)
+			}
 		}
 	}
 	params = append(params, []string{`-n`, features.GetHelmNamespace(), features.GetHelmName(), `.`}...)
