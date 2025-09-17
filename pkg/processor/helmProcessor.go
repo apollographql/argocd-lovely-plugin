@@ -1,14 +1,16 @@
 package processor
 
 import (
+	"errors"
 	"fmt"
-	"github.com/crumbhole/argocd-lovely-plugin/pkg/features"
-	"gopkg.in/yaml.v3"
 	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/crumbhole/argocd-lovely-plugin/pkg/features"
+	"gopkg.in/yaml.v3"
 )
 
 // Dependency is one repository that this chart is dependent upon
@@ -125,14 +127,34 @@ func (h HelmProcessor) Generate(input *string, basePath string, path string) (*s
 	if err != nil {
 		return nil, err
 	}
-	helmValues, err := features.GetHelmValues()
+	rawHelmValues, err := features.GetHelmValues()
 	if err != nil {
 		return nil, err
 	}
-	err = MergeYaml(path+"/"+helmValues[0], features.GetHelmMerge(), features.GetHelmPatch())
-	if err != nil {
-		return nil, err
+
+	helmValues := []string{}
+	for _, rawHelmValueFile := range rawHelmValues {
+		if features.GetHelmIgnoreMissingValueFiles() {
+			_, err = os.Stat(path + "/" + rawHelmValueFile)
+			if !os.IsNotExist(err) {
+				helmValues = append(helmValues, rawHelmValueFile)
+			}
+		} else {
+			helmValues = append(helmValues, rawHelmValueFile)
+		}
 	}
+
+	if features.GetHelmMerge() != `` || features.GetHelmPatch() != `` {
+		if len(helmValues) == 0 {
+			return nil, errors.New("cannot specify LOVELY_HELM_MERGE or LOVELY_HELM_PATCH unless there is a values file on disk")
+		}
+
+		err = MergeYaml(path+"/"+helmValues[0], features.GetHelmMerge(), features.GetHelmPatch())
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	params := []string{`template`}
 	if features.GetHelmCRDs() {
 		params = append(params, `--include-crds`)
