@@ -3,10 +3,12 @@ package processor
 import (
 	"bytes"
 	"fmt"
-	"github.com/crumbhole/argocd-lovely-plugin/pkg/features"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
+
+	"github.com/crumbhole/argocd-lovely-plugin/pkg/features"
 )
 
 const (
@@ -14,6 +16,7 @@ const (
 )
 
 func execute(path string, command string, params ...string) (string, error) {
+	log.Printf("about to execute %v %v", command, params)
 	cmd := exec.Command(command, params...)
 	cmd.Dir = path
 
