@@ -16,7 +16,7 @@ const (
 )
 
 func execute(path string, command string, params ...string) (string, error) {
-	log.Printf("about to execute %v %v", command, params)
+	log.Printf("about to execute %v %v\n", command, params)
 	cmd := exec.Command(command, params...)
 	cmd.Dir = path
 

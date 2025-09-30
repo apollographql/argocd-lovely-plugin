@@ -2,6 +2,7 @@ package processor
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -132,9 +133,12 @@ func (h HelmProcessor) Generate(input *string, basePath string, path string) (*s
 	}
 
 	helmValues := []string{}
+	log.Printf("dsg raw helm values %v\n", rawHelmValues)
 	for _, rawHelmValueFile := range rawHelmValues {
 		if features.GetHelmIgnoreMissingValueFiles() {
+			log.Printf("dsg checking existence of %v\n", path+"/"+rawHelmValueFile)
 			_, err = os.Stat(path + "/" + rawHelmValueFile)
+			log.Printf("dsg err %v isnotexist %v\n", err, os.IsNotExist(err))
 			if !os.IsNotExist(err) {
 				helmValues = append(helmValues, rawHelmValueFile)
 			}
@@ -142,6 +146,7 @@ func (h HelmProcessor) Generate(input *string, basePath string, path string) (*s
 			helmValues = append(helmValues, rawHelmValueFile)
 		}
 	}
+	log.Printf("dsg helm values %v\n", helmValues)
 
 	if features.GetHelmMerge() != `` || features.GetHelmPatch() != `` {
 		var mergeTarget string
