@@ -12,7 +12,7 @@ require (
 	github.com/otiai10/copy v1.14.1
 	github.com/stretchr/testify v1.11.1
 	gopkg.in/yaml.v3 v3.0.1
-	jaytaylor.com/html2text v0.0.0-20230321000545-74c2419ad056
+	jaytaylor.com/html2text 1a4bdc82ecec
 	k8s.io/apimachinery v0.34.1
 	sigs.k8s.io/kustomize/api v0.20.1
 	sigs.k8s.io/kustomize/kyaml v0.20.1
